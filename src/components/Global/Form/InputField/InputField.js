@@ -13,7 +13,7 @@ const InputField = ({
     inputClassName += hasError ? " is-invalid" : " is-valid";
   }
   return (
-    <div>
+    <div className="mb-3">
       {label && <label>{label}</label>}
       <input
         className={inputClassName}
