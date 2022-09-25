@@ -1,6 +1,18 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { useNavigate } from "react-router-dom";
 import LoginPage from "./LoginPage";
+
+/* 
+you can direct mock your useNavigate() like this before all the imports
+for the file in which you are writing the test case
+*/
+const mockedUsedNavigate = jest.fn();
+
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockedUsedNavigate,
+}));
 
 describe("LoginPage", () => {
   describe("Layout", () => {
@@ -247,6 +259,17 @@ describe("LoginPage", () => {
       const spinner = screen.getByText(/Loading.../i);
 
       await waitFor(() => expect(spinner).not.toBeInTheDocument());
+    });
+
+    it("redirects to homepage after successfull login", async () => {
+      const actions = {
+        postLogin: jest.fn().mockResolvedValue({}),
+      };
+
+      setupForSubmit({ actions });
+      fireEvent.click(button);
+
+      expect(mockedUsedNavigate).toHaveBeenCalledWith("/", { replace: true });
     });
   });
 });

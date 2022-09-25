@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import InputField from "../components/Global/Form/InputField/InputField";
 import ButtonWithProgress from "../components/Global/Buttons/ButtonWithProgress";
 
 const LoginPage = ({ actions }) => {
+  let navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [apiError, setApiError] = useState(undefined);
@@ -25,6 +29,7 @@ const LoginPage = ({ actions }) => {
       .postLogin(body)
       .then((response) => {
         setLoading(false);
+        navigate("/", { replace: true });
       })
       .catch((error) => {
         setLoading(false);

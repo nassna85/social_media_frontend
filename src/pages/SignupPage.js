@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import InputField from "../components/Global/Form/InputField/InputField";
 import ButtonWithProgress from "../components/Global/Buttons/ButtonWithProgress";
 
 const SignupPage = ({ actions }) => {
+  const navigate = useNavigate();
+
   const [user, setUser] = useState({
     displayName: "",
     username: "",
@@ -60,6 +63,7 @@ const SignupPage = ({ actions }) => {
       .postSignup(user)
       .then((response) => {
         setLoading(false);
+        navigate("/login", { replace: true });
       })
       .catch((e) => {
         setLoading(false);

@@ -4,6 +4,17 @@ import "@testing-library/jest-dom/extend-expect";
 
 import SignupPage from "./SignupPage";
 
+/* 
+you can direct mock your useNavigate() like this before all the imports
+for the file in which you are writing the test case
+*/
+const mockedUsedNavigate = jest.fn();
+
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockedUsedNavigate,
+}));
+
 describe("UserSignupPage", () => {
   describe("Layout", () => {
     it("has header of Sign Up", () => {
@@ -375,6 +386,19 @@ describe("UserSignupPage", () => {
       );
 
       expect(errorMessage).not.toBeInTheDocument();
+    });
+
+    it("redirects to login after successfull login", async () => {
+      const actions = {
+        postSignup: jest.fn().mockResolvedValue({}),
+      };
+
+      setupForSubmit({ actions });
+      fireEvent.click(button);
+
+      expect(mockedUsedNavigate).toHaveBeenCalledWith("/login", {
+        replace: true,
+      });
     });
   });
 });
