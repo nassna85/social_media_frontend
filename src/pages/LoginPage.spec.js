@@ -44,9 +44,19 @@ describe("LoginPage", () => {
       };
     };
 
+    const mockAsyncDelayed = () => {
+      return jest.fn().mockImplementation(() => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            resolve({});
+          }, 300);
+        });
+      });
+    };
+
     let usernameInput, passwordInput, button;
 
-    const setupFormSubmit = (props) => {
+    const setupForSubmit = (props) => {
       const utils = render(<LoginPage {...props} />);
 
       const { container } = utils;
@@ -81,14 +91,14 @@ describe("LoginPage", () => {
         postLogin: jest.fn().mockResolvedValue({}),
       };
 
-      setupFormSubmit({ actions });
+      setupForSubmit({ actions });
 
       fireEvent.click(button);
       expect(actions.postLogin).toHaveBeenCalledTimes(1);
     });
 
     it("does not throw exception when clicking the button when actions not provided in props", () => {
-      setupFormSubmit();
+      setupForSubmit();
 
       expect(() => fireEvent.click(button)).not.toThrow();
     });
@@ -98,7 +108,7 @@ describe("LoginPage", () => {
         postLogin: jest.fn().mockResolvedValue({}),
       };
 
-      setupFormSubmit({ actions });
+      setupForSubmit({ actions });
       fireEvent.click(button);
 
       const expectedUserObject = {
@@ -110,18 +120,18 @@ describe("LoginPage", () => {
     });
 
     it("enables the button when username and password is not empty", () => {
-      setupFormSubmit();
+      setupForSubmit();
       expect(button).not.toBeDisabled();
     });
 
     it("disables the button when username is empty", () => {
-      setupFormSubmit();
+      setupForSubmit();
       fireEvent.change(usernameInput, changeEvent(""));
       expect(button).toBeDisabled();
     });
 
     it("disables the button when password is empty", () => {
-      setupFormSubmit();
+      setupForSubmit();
       fireEvent.change(passwordInput, changeEvent(""));
       expect(button).toBeDisabled();
     });
@@ -137,7 +147,7 @@ describe("LoginPage", () => {
         }),
       };
 
-      const { findByText } = setupFormSubmit({ actions });
+      const { findByText } = setupForSubmit({ actions });
       fireEvent.click(button);
 
       const alert = await findByText("Login failed");
@@ -155,7 +165,7 @@ describe("LoginPage", () => {
         }),
       };
 
-      const { findByText } = setupFormSubmit({ actions });
+      const { findByText } = setupForSubmit({ actions });
       fireEvent.click(button);
 
       const alert = await findByText("Login failed");
@@ -174,12 +184,72 @@ describe("LoginPage", () => {
         }),
       };
 
-      const { findByText } = setupFormSubmit({ actions });
+      const { findByText } = setupForSubmit({ actions });
       fireEvent.click(button);
 
       const alert = await findByText("Login failed");
       fireEvent.change(passwordInput, changeEvent("updated-P4ssword"));
       expect(alert).not.toBeInTheDocument();
     });
+
+    it("does not allow user to click the Login button when there is an ongoing api call", () => {
+      const actions = {
+        postLogin: mockAsyncDelayed(),
+      };
+
+      setupForSubmit({ actions });
+      fireEvent.click(button);
+      fireEvent.click(button);
+
+      expect(actions.postLogin).toHaveBeenCalledTimes(1);
+    });
+
+    it("displays spinner whern there is an ongoing api call", () => {
+      const actions = {
+        postLogin: mockAsyncDelayed(),
+      };
+
+      setupForSubmit({ actions });
+      fireEvent.click(button);
+
+      const spinner = screen.getByText(/Loading.../i);
+
+      expect(spinner).toBeInTheDocument();
+    });
+
+    it("hide spinner after api call finished successfully", async () => {
+      const actions = {
+        postLogin: mockAsyncDelayed(),
+      };
+
+      setupForSubmit({ actions });
+      fireEvent.click(button);
+
+      const spinner = screen.getByText(/Loading.../i);
+
+      await waitFor(() => expect(spinner).not.toBeInTheDocument());
+    });
+
+    it("hide spinner after api call finished with error", async () => {
+      const actions = {
+        postLogin: jest.fn().mockImplementation(() => {
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              reject({ response: { data: {} } });
+            }, 300);
+          });
+        }),
+      };
+
+      setupForSubmit({ actions });
+      fireEvent.click(button);
+
+      const spinner = screen.getByText(/Loading.../i);
+
+      await waitFor(() => expect(spinner).not.toBeInTheDocument());
+    });
   });
 });
+
+// Not display error browser in test terminal
+console.error = () => {};

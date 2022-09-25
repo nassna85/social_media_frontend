@@ -1,10 +1,12 @@
 import { useState } from "react";
 import InputField from "../components/Global/Form/InputField/InputField";
+import ButtonWithProgress from "../components/Global/Buttons/ButtonWithProgress";
 
 const LoginPage = ({ actions }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [apiError, setApiError] = useState(undefined);
+  const [loading, setLoading] = useState(false);
 
   const handleChangeUsername = (e) => {
     setUsername(e.target.value);
@@ -18,11 +20,18 @@ const LoginPage = ({ actions }) => {
 
   const handleLogin = () => {
     const body = { username, password };
-    actions.postLogin(body).catch((error) => {
-      if (error?.response) {
-        setApiError(error.response?.data?.message);
-      }
-    });
+    setLoading(true);
+    actions
+      .postLogin(body)
+      .then((response) => {
+        setLoading(false);
+      })
+      .catch((error) => {
+        setLoading(false);
+        if (error?.response) {
+          setApiError(error.response?.data?.message);
+        }
+      });
   };
 
   return (
@@ -43,13 +52,12 @@ const LoginPage = ({ actions }) => {
       />
       {apiError && <div className="alert alert-danger">{apiError}</div>}
       <div className="text-center">
-        <button
-          className="btn btn-primary"
+        <ButtonWithProgress
+          text="Login"
           onClick={handleLogin}
-          disabled={username === "" || password === ""}
-        >
-          Login
-        </button>
+          disabled={loading || username === "" || password === ""}
+          loading={loading}
+        />
       </div>
     </div>
   );

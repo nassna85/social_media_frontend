@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import InputField from "../components/Global/Form/InputField/InputField";
+import ButtonWithProgress from "../components/Global/Buttons/ButtonWithProgress";
 
 const SignupPage = ({ actions }) => {
   const [user, setUser] = useState({
@@ -120,21 +121,12 @@ const SignupPage = ({ actions }) => {
         />
       </div>
       <div className="text-center">
-        <button
-          className="btn btn-primary"
+        <ButtonWithProgress
+          text="Create account"
           onClick={handleSignupSubmit}
           disabled={loading || !passwordRepeatConfirmed}
-        >
-          {loading && (
-            <div
-              className="spinner-border spinner-border-sm me-1"
-              role="status"
-            >
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          )}
-          Create account
-        </button>
+          loading={loading}
+        />
       </div>
     </div>
   );
