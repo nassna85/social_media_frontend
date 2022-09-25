@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 
 import * as apiCalls from "../api/apiCalls";
 
+import TopBar from "../components/Global/TopBar/TopBar";
 import HomePage from "../pages/HomePage";
 import UserPage from "../pages/UserPage";
 import SignupPage from "../pages/SignupPage";
@@ -15,6 +16,7 @@ const actions = {
 function App() {
   return (
     <div>
+      <TopBar />
       <div className="container">
         <Routes>
           <Route path="/" element={<HomePage />} />
